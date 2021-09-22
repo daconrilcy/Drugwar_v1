@@ -2,19 +2,26 @@ from gamelib.location import create_location, locations, actual_location
 from gamelib.Drug import create_drugs_list, drugs
 from gamelib.personna import Personna
 import pygame
-from gamelib.inteface.windows import create_fenetre_principal
+from gamelib.inteface.windows import MainWindow
+from gamelib.inteface.map import MyTmx
 
 
-def main_engine():
-    running = True
+class Game:
+    def __init__(self):
+        # creation de la fenetre principale
+        self.mwin = MainWindow()
 
-    create_fenetre_principal()
+        # chargement de la carte(tmx)
+        self.tmx = MyTmx(self.mwin.screen)
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-    pygame.quit()
+    def run(self):
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+        pygame.quit()
 
 
 # first Engine

@@ -1,4 +1,4 @@
-from gamelib.engine import main_engine
+from gamelib.engine import Game
 
 
-main_engine()
+mygame = Game()
