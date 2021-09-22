@@ -55,10 +55,10 @@ def mouvement():
 def buy(loc):
     print("buy drug(1) or object(2) ?")
     drop = input()
-    if drop == 1:
+    if drop == "1":
         "Which drug do you want to buy ?"
         loc.drugs.print_stock_datas()
-    if drop == 2:
+    if drop == "2":
         "Which object do you want to buy ?"
         loc.objects.print_stock_datas()
 

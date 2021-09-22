@@ -55,7 +55,7 @@ class Drug_Stock(Stock):
         for lo in self.inventory:
             print(str(n) + " : " + lo.drug.name + "\tstock : " + str(lo.qty) + " " + lo.drug.unit + "\tprice unit : $"
                   + str(lo.price_unit))
-        n += 1
+            n += 1
 
 class Obj_Stock(Stock):
     def __init__(self):
