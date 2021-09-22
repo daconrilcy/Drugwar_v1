@@ -1,9 +1,4 @@
-from gamelib.Drug import drugType, Drug
+from gamelib.engine import main_engine
 
 
-print(drugType[2])
-
-coco = Drug(name='Coco de Miami', drugtype=1)
-
-coco.qty = 100
-coco.price = 60
+main_engine()
