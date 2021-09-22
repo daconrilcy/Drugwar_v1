@@ -25,4 +25,3 @@ def create_drugs_list():
     for dr in drugnames:
         tmp = Drug(drugname=dr)
         drugs.append(tmp)
-

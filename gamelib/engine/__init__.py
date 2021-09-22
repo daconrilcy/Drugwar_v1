@@ -1,8 +1,24 @@
 from gamelib.location import create_location, locations, actual_location
 from gamelib.Drug import create_drugs_list, drugs
 from gamelib.personna import Personna
+import pygame
+from gamelib.inteface.windows import create_fenetre_principal
 
 
+def main_engine():
+    running = True
+
+    create_fenetre_principal()
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+    pygame.quit()
+
+
+# first Engine
+"""
 def main_engine():
     create_drugs_list()
     create_location()
@@ -67,3 +83,4 @@ def buy(loc):
 
 def sell():
     pass
+"""
