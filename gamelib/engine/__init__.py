@@ -1,26 +1,63 @@
+import pyscroll
+
 from gamelib.location import create_location, locations, actual_location
 from gamelib.Drug import create_drugs_list, drugs
 from gamelib.personna import Personna
 import pygame
-from gamelib.inteface.windows import MainWindow
-from gamelib.inteface.map import MyTmx
+import pytmx
+import pyscroll
 
+import gamelib.inteface.windows as game_win
+import gamelib.inteface.map as game_map
+from gamelib.inteface.player import Player
 
 class Game:
     def __init__(self):
         # creation de la fenetre principale
-        self.mwin = MainWindow()
+        self.main_win = game_win.MainWindow()
 
         # chargement de la carte(tmx)
-        self.tmx = MyTmx(self.mwin.screen)
+        self.game_map = game_map.MyTmx(self.main_win.screen)
+
+        # generer un joueur
+        self.player_position = self.game_map.tmx_data.get_object_by_name('player')
+        self.player = Player(self.player_position.x, self.player_position.y)
+
+        # attacher le joueur au groupe
+        self.game_map.group.add(self.player)
+
+    def handle_input(self):
+        pressed = pygame.key.get_pressed()
+
+        if pressed[pygame.K_UP]:
+            self.player.move(0)
+        elif pressed[pygame.K_DOWN]:
+            self.player.move(1)
+        elif pressed[pygame.K_LEFT]:
+            self.player.move(2)
+        elif pressed[pygame.K_RIGHT]:
+            self.player.move(3)
+
+    def update(self):
+        self.game_map.group.update()
+
+        # verification collision
+        for sprite in self.game_map.group.sprites():
+            if sprite.feet_position.collidelist(self.game_map.walls) > -1:
+                sprite.move_back()
 
     def run(self):
         running = True
-
+        clock = pygame.time.Clock()
         while running:
+            self.handle_input()
+            self.update()
+            self.game_map.group.draw(self.main_win.screen)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+            clock.tick(60)
         pygame.quit()
 
 
