@@ -1,5 +1,5 @@
 import pygame
-
+from math import sqrt
 
 class Player(pygame.sprite.Sprite):
 
@@ -12,9 +12,14 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.position = [x, y]
         self.speed_move = 2
-        self.feet_position = pygame.Rect(0, 0, 32, 32)
+        self.feet_position = pygame.Rect(0, 0, self.rect.width * 0.3, 5)
         self.old_position = self.position.copy()
-
+        self.is_moving = False
+        self.target_move = None
+        self.delta_x = 0
+        self.delta_y = 0
+        self.cos_di = 0
+        self.sin_di = 0
         self.images = {
             "down": self.get_image(32, 0),
             "up": self.get_image(32, 96),
@@ -34,7 +39,42 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[name]
         self.image.set_colorkey([0, 0, 0])
 
+    def move_to(self, x, y):
+        self.is_moving = True
+        self.target_move = (x, y)
+        self.delta_x = x - self.position[0]
+        self.delta_y = y - self.position[1]
+
+        dist = sqrt(self.delta_x ** 2 + self.delta_y ** 2)
+        if dist != 0:
+            self.sin_di = self.delta_y/dist
+            self.cos_di = self.delta_x/dist
+        else:
+            self.sin_di = 0
+            self.cos_di = 0
+
+    def __auto_move(self):
+        delta_x = self.target_move[0] - self.position[0]
+        delta_y = self.target_move[1] - self.position[1]
+        if abs(delta_x) > self.speed_move:
+            self.position[0] += self.speed_move * self.cos_di
+            if self.position[0] < 0:
+                self.position[0] = 0
+        else:
+            self.position[0] = self.target_move[0]
+
+        if abs(delta_y) > self.speed_move:
+            self.position[1] += self.speed_move * self.sin_di
+            if self.position[1] < 0:
+                self.position[1] = 0
+        else:
+            self.position[1] = self.target_move[1]
+
+        if self.position == self.target_move:
+            self.is_moving = False
+
     def move(self, direction: int):
+        self.is_moving = False
         if direction == 0:
             self.position[1] -= self.speed_move
             self.change_animation('up')
@@ -53,10 +93,15 @@ class Player(pygame.sprite.Sprite):
             self.position[1] = 0
 
     def update(self):
+        if self.is_moving:
+            self.__auto_move()
         self.rect.center = self.position
         self.feet_position.midbottom = self.rect.midbottom
 
     def move_back(self):
+        self.is_moving = False
         self.position = self.old_position
         self.rect.center = self.position
         self.feet_position.midbottom = self.rect.midbottom
+
+

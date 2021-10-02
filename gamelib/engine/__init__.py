@@ -1,15 +1,12 @@
-import pyscroll
-
 from gamelib.location import create_location, locations, actual_location
 from gamelib.Drug import create_drugs_list, drugs
 from gamelib.personna import Personna
 import pygame
-import pytmx
-import pyscroll
-
 import gamelib.inteface.windows as game_win
 import gamelib.inteface.map as game_map
 from gamelib.inteface.player import Player
+from gamelib.poly_interact import is_collide_spr_poly
+
 
 class Game:
     def __init__(self):
@@ -26,9 +23,11 @@ class Game:
         # attacher le joueur au groupe
         self.game_map.group.add(self.player)
 
+        self.previous_city = -1
+        self.mouse_pos = None
+
     def handle_input(self):
         pressed = pygame.key.get_pressed()
-
         if pressed[pygame.K_UP]:
             self.player.move(0)
         elif pressed[pygame.K_DOWN]:
@@ -38,18 +37,50 @@ class Game:
         elif pressed[pygame.K_RIGHT]:
             self.player.move(3)
 
+        self.verify_check_click()
+
+    def check_collision(self):
+        for sprite in self.game_map.group.sprites():
+            for wall in self.game_map.walls_poly:
+                if is_collide_spr_poly(sprite.feet_position, wall):
+                    sprite.move_back()
+            city_n = sprite.feet_position.collidelist(self.game_map.city_obj)
+            if city_n > -1:
+                if self.previous_city != city_n:
+                    print("georges est à " + self.game_map.city_name[city_n])
+                    self.previous_city = city_n
+            else:
+                if self.previous_city != city_n:
+                    print("georges est sortie de " + self.game_map.city_name[self.previous_city])
+                    self.previous_city = city_n
+
+    def verify_check_click(self):
+        click = pygame.mouse.get_pressed(3)[0]
+        if click:
+            self.mouse_pos = pygame.mouse.get_pos()
+            r = self.is_in_cities(self.mouse_pos[0], self.mouse_pos[1])
+            self.player.move_to(self.game_map.city_obj[r].center[0], self.game_map.city_obj[r].center[1])
+
+    def is_in_cities(self, x, y):
+        n = 0
+        for city in self.game_map.city_obj:
+            if (x >= city.x) & (x <= city.x + city.width):
+                if (y >= city.y) & (y <= city.y + city.height):
+                    return n
+            n += 1
+
+        return -1
+
     def update(self):
         self.game_map.group.update()
+        self.check_collision()
 
-        # verification collision
-        for sprite in self.game_map.group.sprites():
-            if sprite.feet_position.collidelist(self.game_map.walls) > -1:
-                sprite.move_back()
 
     def run(self):
         running = True
         clock = pygame.time.Clock()
         while running:
+            self.player.save_location()
             self.handle_input()
             self.update()
             self.game_map.group.draw(self.main_win.screen)
