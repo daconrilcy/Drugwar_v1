@@ -23,7 +23,7 @@ class MyTmx:
         self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, self.screen.get_size())
 
         # dessiner le groupe de calque
-        self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=3)
+        self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=4)
 
         # zones interdites
         self.walls_poly = []

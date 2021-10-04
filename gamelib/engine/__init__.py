@@ -26,6 +26,8 @@ class Game:
         self.previous_city = -1
         self.mouse_pos = None
 
+        self.rect = pygame.Rect(100, 100, 100, 100)
+
     def handle_input(self):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
@@ -59,7 +61,8 @@ class Game:
         if click:
             self.mouse_pos = pygame.mouse.get_pos()
             r = self.is_in_cities(self.mouse_pos[0], self.mouse_pos[1])
-            self.player.move_to(self.game_map.city_obj[r].center[0], self.game_map.city_obj[r].center[1])
+            if r != -1:
+                self.player.move_to(self.game_map.city_obj[r].center[0], self.game_map.city_obj[r].center[1])
 
     def is_in_cities(self, x, y):
         n = 0
@@ -75,15 +78,20 @@ class Game:
         self.game_map.group.update()
         self.check_collision()
 
-
     def run(self):
         running = True
         clock = pygame.time.Clock()
+
         while running:
+
             self.player.save_location()
             self.handle_input()
             self.update()
             self.game_map.group.draw(self.main_win.screen)
+
+            pygame.draw.rect(self.main_win.screen, (0, 200, 0), self.rect, 5)
+            pygame.draw.line(self.main_win.screen, (255,0,0), (60, 80), (130, 100), 5)
+
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
