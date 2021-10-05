@@ -6,7 +6,7 @@ import gamelib.inteface.windows as game_win
 import gamelib.inteface.map as game_map
 from gamelib.inteface.player import Player
 from gamelib.poly_interact import is_collide_spr_poly
-
+from tools.editor_path import EditorPath
 
 class Game:
     def __init__(self):
@@ -28,18 +28,39 @@ class Game:
 
         self.rect = pygame.Rect(100, 100, 100, 100)
 
-    def handle_input(self):
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_UP]:
-            self.player.move(0)
-        elif pressed[pygame.K_DOWN]:
-            self.player.move(1)
-        elif pressed[pygame.K_LEFT]:
-            self.player.move(2)
-        elif pressed[pygame.K_RIGHT]:
-            self.player.move(3)
+        self.edit_path = False
 
-        self.verify_check_click()
+        self.delay_touch_ini = 10
+        self.delay_touch = self.delay_touch_ini
+
+        self.editor_path = EditorPath(self.main_win.screen)
+        self.running = False
+
+    def handle_input(self):
+        self.delay_touch -= 1
+        for event in pygame.event.get():
+            if self.edit_path:
+                self.editor_path.handle_event(event)
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse_pos = pygame.mouse.get_pos()
+                r = self.is_in_cities(self.mouse_pos[0], self.mouse_pos[1])
+                if r != -1:
+                    self.player.move_to(self.game_map.city_obj[r].center[0], self.game_map.city_obj[r].center[1])
+
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            elif event.type == pygame.KEYDOWN:
+                self.player.action_key(event.key, "down")
+                if event.key == pygame.K_p:
+                    if self.edit_path:
+                        self.edit_path = False
+                    else:
+                        self.edit_path = True
+
+            elif event.type == pygame.KEYUP:
+                self.player.action_key(event.key, "up")
 
     def check_collision(self):
         for sprite in self.game_map.group.sprites():
@@ -57,12 +78,7 @@ class Game:
                     self.previous_city = city_n
 
     def verify_check_click(self):
-        click = pygame.mouse.get_pressed(3)[0]
-        if click:
-            self.mouse_pos = pygame.mouse.get_pos()
-            r = self.is_in_cities(self.mouse_pos[0], self.mouse_pos[1])
-            if r != -1:
-                self.player.move_to(self.game_map.city_obj[r].center[0], self.game_map.city_obj[r].center[1])
+        pass
 
     def is_in_cities(self, x, y):
         n = 0
@@ -79,25 +95,23 @@ class Game:
         self.check_collision()
 
     def run(self):
-        running = True
+        self.running = True
         clock = pygame.time.Clock()
 
-        while running:
+        while self.running:
 
             self.player.save_location()
             self.handle_input()
             self.update()
+
             self.game_map.group.draw(self.main_win.screen)
-
-            pygame.draw.rect(self.main_win.screen, (0, 200, 0), self.rect, 5)
-            pygame.draw.line(self.main_win.screen, (255,0,0), (60, 80), (130, 100), 5)
-
+            if self.edit_path:
+                self.editor_path.update()
             pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
             clock.tick(60)
         pygame.quit()
+
+
 
 
 # first Engine
