@@ -1,5 +1,5 @@
 import pygame
-
+from math import pi as PI
 
 class PtLine:
     def __init__(self, x: float, y: float):
@@ -24,13 +24,13 @@ class PtLine:
         return str(self.x) + ", " + str(self.y)
 
 
-class DrawLine:
-    def __init__(self, surface: pygame.Surface, x, y):
+class DrawFigure:
+    def __init__(self, surface: pygame.Surface, x: float, y: float):
         self.surface = surface
         self.origine = PtLine(x, y)
         self.end = PtLine(x, y)
         self.color = (0, 255, 0)
-        self.line = None
+        self.form = None
         self.statut = "created"
         self.a = 0
         self.b = 0
@@ -39,8 +39,7 @@ class DrawLine:
         self.update()
 
     def update(self):
-        self.line = pygame.draw.line(self.surface, self.color,
-                                     (self.origine.x, self.origine.y), (self.end.x, self.end.y), self._ep)
+        pass
 
     def change_end(self, pt: PtLine):
         if pt is not None:
@@ -48,27 +47,75 @@ class DrawLine:
             self.udpdate_formula()
 
     def udpdate_formula(self):
+        pass
+
+    def get_y(self, x: float):
+        pass
+
+    def pt_is_inline(self, pt: PtLine, marge=0):
+        pass
+
+
+class DrawLine(DrawFigure):
+
+    def update(self):
+        self.form = pygame.draw.line(self.surface, self.color,
+                                     (self.origine.x, self.origine.y), (self.end.x, self.end.y), self._ep)
+
+    def udpdate_formula(self):
         if self.origine.x != self.end.x:
-            self.a =(self.origine.y-self.end.y) / (self.origine.x - self.end.x)
+            self.a = (self.origine.y-self.end.y) / (self.origine.x - self.end.x)
         else:
             self.a = 0
         self.b = self.origine.y - self.a * self.origine.x
 
     def get_y(self, x: float):
-        print("self.origine : " + str(self.origine.parse()),)
-        print("self.end : " + str(self.end.parse()))
-        print("ax + b : " + str(self.a) + " x " + str(x) + " + " + str(self.b))
         return self.a * x + self.b
 
     def pt_is_inline(self, pt: PtLine, marge=0):
         print(pt.x)
         y2 = self.get_y(pt.x)
-        print("y :" + str(pt.y))
-        print("y2 :" + str(y2))
         if (y2 >= pt.y - marge) & (y2 <= pt.y + marge):
             return True
         else:
             return False
+
+
+class DrawCurve(DrawFigure):
+    start_angle = 0
+    stop_angle = PI/2
+
+    def update(self):
+        self.form = pygame.draw.arc(self.surface, self.color,
+                                    pygame.Rect(self.origine.x, self.origine.y, self.end.x, self.end.y),
+                                    self.start_angle, self.stop_angle, self._ep)
+
+    def udpdate_formula(self):
+        if self.origine.x != self.end.x:
+            self.a = (self.origine.y - self.end.y) / (self.origine.x - self.end.x)
+        else:
+            self.a = 0
+        self.b = self.origine.y - self.a * self.origine.x
+
+    def get_y(self, x: float):
+        return self.a * x + self.b
+
+    def pt_is_inline(self, pt: PtLine, marge=0):
+        x_min = self.origine.x
+        x_max = self.end.x
+        y_min = self.origine.y
+        y_max = self.end.y
+
+        if self.origine.x > self.end.x:
+            x_min = self.end.x
+            x_max = self.origine.x
+        if self.origine.y > self.end.y:
+            y_min = self.end.y
+            y_max = self.origine.y
+
+        if (pt.x < x_min - marge) | (pt.x > x_max + marge) | (pt.y < y_min - marge) | (pt.y > y_max + marge):
+            return False
+        angle = PI - abs(pt.y/pt.x)
 
 
 class DrawPoint:
