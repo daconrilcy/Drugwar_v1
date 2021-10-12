@@ -166,9 +166,6 @@ class Arc:
         self.is_create_new = True
         self.reset()
 
-    def pos_origine(self, x, y):
-        self.origine = x, y
-
     def pos_end(self, x, y):
         self.end = x, y
         self.width = abs(self.end[0] - self.origine[0])
@@ -222,11 +219,6 @@ class Arc:
                              [self.origine[0], self.origine[1]-self.height, self.width, self.height], 1)
             pygame.draw.rect(self.surface, (50, 20, 20), self.new_rect, 1)
 
-    def draw_circle(self):
-        # Dessin des cerlces de supports de l'ellipse
-        pygame.draw.circle(self.surface, (255, 0, 0), self.center, self.width, 1)
-        pygame.draw.circle(self.surface, (0, 255, 0), self.center, self.height, 1)
-
     def point_projete(self):
 
         # calcul d'angle entre la droite centre-souris (CS) et l'horizontal
@@ -271,7 +263,9 @@ class Arc:
         pt_SS = x5, y5
 
         if self.affiche_projection:
-            self.draw_circle()
+            # Dessin des cerlces de supports de l'ellipse
+            pygame.draw.circle(self.surface, (255, 0, 0), self.center, self.width, 1)
+            pygame.draw.circle(self.surface, (0, 255, 0), self.center, self.height, 1)
 
             self.draw_point(self.mouse_pos, (0, 0, 255))
             self.draw_point(pt_A, (255, 0, 0,))
@@ -326,7 +320,7 @@ class Arc:
                 self.is_active = False
                 self.is_modif = True
                 self.first_mouse_pos = mouse_pos
-                self.pos_origine(mouse_pos[0], mouse_pos[1])
+                self.origine = mouse_pos[0], mouse_pos[1]
                 self.pos_end(mouse_pos[0], mouse_pos[1])
 
             elif position == "up":
