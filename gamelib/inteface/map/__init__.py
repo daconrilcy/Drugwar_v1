@@ -2,6 +2,7 @@ import pygame.draw
 import pytmx
 import pyscroll
 from gamelib.poly_interact import pytmx_obp_poly_to_shapely_poly_2d
+import os.path
 
 
 class City_Obj(pygame.Rect):
@@ -17,8 +18,10 @@ class MyTmx:
 
     def __init__(self, screen):
         self.screen = screen
+        path_carte = "..\gamelib\inteface\map\carte.tmx"
+        print(path_carte)
         self.tmx_data = pytmx.util_pygame.load_pygame(
-            "D:\Python\pythonProject\Drugwar_v1\gamelib\inteface\map\carte.tmx")
+            path_carte)
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
         self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, self.screen.get_size())
 

@@ -18,7 +18,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super(Player, self).__init__()
         self.sprite_sheet = pygame.image.load(
-            'D:\Python\pythonProject\Drugwar_v1\gamelib\inteface\player\player_simple.png')
+            '..\gamelib\inteface\player\player_simple.png')
         self.image = self.get_image(0, 0)
         self.image.set_colorkey([0, 0, 0])
         self.rect = self.image.get_rect()
@@ -121,7 +121,6 @@ class Player(pygame.sprite.Sprite):
 
         if action_to_do is not None:
             for act_encours in self.actions_encours:
-                print(key)
                 if act_encours == action_to_do:
                     is_already_in = True
                     del_action = act_encours

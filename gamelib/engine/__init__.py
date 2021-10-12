@@ -6,7 +6,8 @@ import gamelib.inteface.windows as game_win
 import gamelib.inteface.map as game_map
 from gamelib.inteface.player import Player
 from gamelib.poly_interact import is_collide_spr_poly
-from tools.editor_path import EditorPath
+from tools.editor_path.engine import EditorPath
+
 
 class Game:
     def __init__(self):
