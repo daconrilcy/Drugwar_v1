@@ -1,21 +1,17 @@
 import pygame.draw
+from tools.draw import DrawFigure
 from pygame import Surface, Rect, Color
 from math import pi, cos, sin, sqrt, atan
-from dashed_line import DashedLine
+from tools.draw.dashed_line import DashedLine
 
 
-class Arc:
-    def __init__(self, surface: Surface, x, y):
+class Arc(DrawFigure):
+    def __init__(self, surface: Surface, x, y, marge: int = 10):
+        super().__init__(surface=surface, x=x, y=y, marge=marge)
         self.surface = surface
-        self.ep = 5
-        self.ep_survol = 10
-        self.ep_encours = self.ep
-        self.origine = x, y
-        self.new_origine = x, y
-        self.end = x, y
+        self.points = [(x, y), (x, y)]
         self.center = x, y
-        self.color = Color(255, 255, 255)
-        self.form = None
+        self.color = Color(0, 255, 0)
         self.width = 0
         self.new_width = 0
         self.new_height = 0
@@ -28,8 +24,7 @@ class Arc:
         self.first_mouse_pos = 0, 0
 
         self.is_active = False
-        self.is_modif = False
-        self.is_create_new = False
+        self.under_modif = False
 
         self.mouse_pos = x, y
 
@@ -42,12 +37,11 @@ class Arc:
 
         self.affiche_projection = False
         self.affiche_donnee = False
-        self.survol = False
+        self.overed = False
 
     def reset(self):
-        self.origine = 0, 0
-        self.new_origine = 0, 0
-        self.end = 0, 0
+        self.points[0] = 0, 0
+        self.points[1] = 0, 0
         self.center = 0, 0
         self.width = 0
         self.new_width = 0
@@ -60,37 +54,30 @@ class Arc:
         self.affiche_projection = False
 
     def update(self):
-
-        if self.is_modif:
+        ep = self._ep
+        self.check_orientation()
+        if self.under_modif:
             self.draw_rect()
 
         if self.is_active:
             self.point_projete()
-            self.mouse_is_on_arc()
+            self.is_overed()
 
-        self.comportement_survol()
-        if self.is_active | self.is_modif:
-            self.form = pygame.draw.arc(self.surface, self.color, self.new_rect,
-                                        self.angle_start, self.angle_end,
-                                        self.ep_encours)
-        self.check_orientation()
-        self.affich()
+        if self.overed:
+            ep = self._ep_overed
 
-    def affich(self):
-        if self.affiche_donnee:
-            self.delai_affich -= 1
-            if self.delai_affich < self.delai_affich_ini:
-                #indiquer ici les données à afficher
-                self.delai_affich = self.delai_affich_ini
+        if self.is_active | self.under_modif:
+            pygame.draw.arc(self.surface, self.color, self.new_rect,
+                            self.angle_start, self.angle_end, ep)
 
-    def create_new(self):
-        self.is_create_new = True
-        self.reset()
+        pygame.draw.line(self.surface, self.color, (self.points[0][0], self.points[0][1]),
+                         (self.points[1][0], self.points[1][1]), ep)
+        #pygame.draw.arc(self.surface, (255, 0, 0), self.new_rect, self.angle_start, self.angle_end, ep)
 
     def pos_end(self, x, y):
-        self.end = x, y
-        self.width = abs(self.end[0] - self.origine[0])
-        self.height = abs(self.end[1] - self.origine[1])
+        self.points[1] = x, y
+        self.width = abs(self.points[1][0] - self.points[0][0])
+        self.height = abs(self.points[1][1] - self.points[0][1])
 
     def draw_rect(self):
         # l'arc est crée à partir d'un rect. Cependant pygame, le crée en fonction de l'angle de départ de fin.
@@ -98,34 +85,38 @@ class Arc:
         # pour qu'il suive le pointeur de la souris.
         self.new_width = self.width * 2
         self.new_height = self.height * 2
-        xo, yo = self.origine[0], self.origine[1]
-        self.angle_start = pi/2 * self.orientation
-        self.angle_start = pi / 2 * (self.orientation + 1)
+        xo, yo = self.points[0][0], self.points[0][1]
+        self.angle_start = 0
+        self.angle_start = pi/2
+        new_origine = self.points[0]
         if self.orientation == 0:
-            self.new_origine = self.origine[0] - self.width, self.origine[1]
-            self.center = self.origine[0], self.origine[1] + self.height
+            self.angle_start = pi / 2
+            self.angle_end = pi
+            self.center = self.points[0][0], self.points[0][1] - self.height
 
         elif self.orientation == 1:
-            self.new_origine = self.end[0], self.origine[1]
-            self.center = self.origine[0], self.origine[1] + self.height
-            xo, yo = self.new_origine[0], self.new_origine[1]
+            self.angle_start = 0
+            self.angle_end = pi/2
+            self.center = self.points[1][0] - self.width, self.points[1][1]
+            xo, yo = new_origine[0], new_origine[1]
 
         elif self.orientation == 2:
-            self.new_origine = self.end[0], self.end[1] - self.height
-            self.center = self.origine[0], self.origine[1] - self.height
-            xo, yo = self.new_origine[0], self.origine[1] - self.height
+            self.angle_start = 3 * pi/2
+            self.angle_end = 2 * pi
+            self.center = self.points[1][0]-self.width, self.points[0][1] - self.height
+            xo, yo = new_origine[0], self.points[0][1] - self.height
 
         elif self.orientation == 3:
-            self.new_origine = self.origine[0] - self.width, self.end[1] - self.height
-            self.center = self.origine[0], self.origine[1] - self.height
-            xo, yo = self.origine[0], self.origine[1] - self.height
+            self.angle_start = pi
+            self.angle_end = 3 * pi/2
+            self.center = self.points[0][0], self.points[0][1] - self.height
+            xo, yo = self.points[0][0], self.points[0][1] - self.height
 
-        self.new_rect = Rect(self.new_origine[0], self.new_origine[1], self.new_width, self.new_height)
+        self.new_rect = Rect(self.center[0], self.center[1], self.new_width, self.new_height)
         pygame.draw.rect(self.surface, (50, 20, 20), self.new_rect, 1)
         pygame.draw.rect(self.surface, (50, 50, 50), [xo, yo, self.width, self.height], 1)
 
     def point_projete(self):
-
         # calcul d'angle entre la droite centre-souris (CS) et l'horizontal
         self.angle_mouse = angle_droite(self.center, self.mouse_pos)
 
@@ -199,58 +190,41 @@ class Arc:
             dl = DashedLine(self.surface, color, pt_A, pt_B, ep, dash_len)
             dl.update()
 
-    def action_click(self, position, mouse_pos):
-        if self.is_create_new:
-            if position == "down":
-                self.is_active = False
-                self.is_modif = True
-                self.first_mouse_pos = mouse_pos
-                self.origine = mouse_pos[0], mouse_pos[1]
-                self.pos_end(mouse_pos[0], mouse_pos[1])
-
-            elif position == "up":
-                self.pos_end(mouse_pos[0], mouse_pos[1])
-                self.is_modif = False
-                self.is_active = True
-                self.is_create_new = False
+    def modif_point_to(self, npt: int, coord: tuple):
+        if npt == 0:
+            self.points[npt] = coord
+        elif npt == 1:
+            self.pos_end(coord[0], coord[1])
+        self.statut = "modified"
 
     def check_orientation(self):
-        if self.mouse_pos[1] > self.first_mouse_pos[1]:
-            if self.mouse_pos[0] > self.first_mouse_pos[0]:
+        if self.points[1][1] < self.points[0][1]:
+            if self.points[1][0] > self.points[0][0]:
                 self.orientation = 0
             else:
                 self.orientation = 1
         else:
-            if self.mouse_pos[0] > self.first_mouse_pos[0]:
+            if self.points[1][0] > self.points[0][0]:
                 self.orientation = 3
             else:
                 self.orientation = 2
 
     def action_is_moving(self, mouse_pos):
-        if self.is_modif:
+        if self.under_modif:
             self.pos_end(mouse_pos[0], mouse_pos[1])
 
         self.mouse_pos = mouse_pos
         self.center_to_mouse = sqrt((mouse_pos[0] - self.center[0]) ** 2 + (mouse_pos[1] - self.center[1]) ** 2)
 
-    def mouse_is_on_arc(self):
+    def is_overed(self):
+        self.overed = False
         angle = 2 * pi - self.angle_mouse
         if (angle >= self.angle_start) & (angle <= self.angle_end):
             if (self.point_mouse_projete[0] - self.marge < self.mouse_pos[0]) & (
                     self.point_mouse_projete[0] + self.marge > self.mouse_pos[0]) & (
                     self.point_mouse_projete[1] - self.marge < self.mouse_pos[1]) & (
                     self.point_mouse_projete[1] + self.marge > self.mouse_pos[1]):
-                self.survol = True
-            else:
-                self.survol = False
-        else:
-            self.survol = False
-
-    def comportement_survol(self):
-        if self.survol:
-            self.ep_encours = self.ep_survol
-        else:
-            self.ep_encours = self.ep
+                self.overed = True
 
 
 def angle_droite(c, s):

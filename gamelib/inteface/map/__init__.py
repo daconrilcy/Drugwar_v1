@@ -2,7 +2,6 @@ import pygame.draw
 import pytmx
 import pyscroll
 from gamelib.poly_interact import pytmx_obp_poly_to_shapely_poly_2d
-import os.path
 
 
 class City_Obj(pygame.Rect):

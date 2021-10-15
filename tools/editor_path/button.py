@@ -28,19 +28,18 @@ class ButtonInterface:
         self.is_overed = False
         self.is_selected = False
         self.fill_overed = (180, 180, 180)
-        self.image_fond = Surface([width, height], pygame.SRCALPHA)
         self.image = None
         if img_path is not None:
-            self.image = pygame.image.load(img_path).convert_alpha()
-            self.image_fond.blit(self.image, Rect(0, 0, width, height))
+            self.image = pygame.transform.scale(pygame.image.load(img_path).convert_alpha(), (self.width, self.height))
 
     def update(self):
         self.update_points()
         self.update_lines()
         self.mouse_is_over()
-        #self.fill_color_update()
-
-        #self.update_fill_rect()
+        self.fill_color_update()
+        self.update_fill_rect()
+        if self.image is not None:
+            self.surface.blit(self.image, (self.left, self.top))
 
     def update_points(self):
         self.p1 = self.left, self.top
