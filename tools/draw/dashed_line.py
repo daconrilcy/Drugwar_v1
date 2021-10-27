@@ -1,4 +1,5 @@
 import numpy as np
+from math import dist
 import pygame
 
 
@@ -26,9 +27,9 @@ class DashedLine:
     def _change_pos(self, x: (float, tuple), y: float = None):
         # convert tuples to numpy arrays
         if isinstance(x, tuple):
-            x = x[0]
             y = x[1]
-        return np.array((x, y))
+            x = x[0]
+        return x, y
 
     def change_start_pos(self, x: (float, tuple), y: float = None):
         self.start_pos = self._change_pos(x, y)
@@ -38,7 +39,7 @@ class DashedLine:
 
     def _calc_length(self):
         # get euclidian distance between start_pos and end_pos
-        self.length = np.linalg.norm(self.end_pos, self.start_pos)
+        self.length = dist(self.end_pos, self.start_pos)
 
     def _calc_dash(self):
         # get amount of pieces that line will be split up in (half of it are amount of dashes)

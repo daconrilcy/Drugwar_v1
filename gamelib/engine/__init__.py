@@ -109,7 +109,7 @@ class Game:
             if self.edit_path:
                 self.editor_path.update()
             pygame.display.flip()
-            clock.tick(60)
+            clock.tick(240)
         pygame.quit()
 
 
