@@ -12,7 +12,7 @@ class _Circle:
         self.color = color
 
 
-class _line:
+class _Line:
     def __init__(self, surface: Surface, start: tuple = (0, 0), end: tuple = (0, 0), color: tuple = (0, 0, 255),
                  ep: int = 1):
         self.surface = surface
@@ -31,7 +31,7 @@ class _line:
         self.a, self.b = _define_formula_droite_2_points(self.start, self.end)
 
 
-class _point:
+class _Point:
     def __init__(self, surface: Surface, center: tuple = (0, 0), rayon: int = 5, color: tuple = (0, 0, 255)):
         self.surface = surface
         self.center = center
@@ -65,19 +65,20 @@ class DrawArc(DrawFigure):
         self.circle_A = _Circle()
         self.circle_B = _Circle(color=(0, 255, 0))
 
-        self.line_cent_mou = _line(surface=surface, ep=self._ep)
+        self.line_cent_mou = _Line(surface=surface, ep=self._ep)
 
         self.reversed = False
 
         self.draw_construction = False
+        self.draw_rect_create = False
 
-        self.interesect_A: _point = _point(surface=surface, color=(255, 0, 0))
-        self.interesect_B: _point = _point(surface=surface, color=(0, 255, 0))
-        self.interesect_C: _point = _point(surface=surface, color=(150, 150, 150))
-        self.projete_C: _point = _point(surface=surface, color=(180, 180, 180))
-        self.interesect_E: _point = _point(surface=surface, color=(255, 0, 0))
-        self.interesect_F: _point = _point(surface=surface, color=(0, 255, 0))
-        self.interesect_G: _point = _point(surface=surface, color=(0, 0, 255))
+        self.interesect_A: _Point = _Point(surface=surface, color=(255, 0, 0))
+        self.interesect_B: _Point = _Point(surface=surface, color=(0, 255, 0))
+        self.interesect_C: _Point = _Point(surface=surface, color=(150, 150, 150))
+        self.projete_C: _Point = _Point(surface=surface, color=(180, 180, 180))
+        self.interesect_E: _Point = _Point(surface=surface, color=(255, 0, 0))
+        self.interesect_F: _Point = _Point(surface=surface, color=(0, 255, 0))
+        self.interesect_G: _Point = _Point(surface=surface, color=(0, 0, 255))
         self.angle_mouse = 0
 
     def update_formula(self):
@@ -87,8 +88,8 @@ class DrawArc(DrawFigure):
         self.define_circles()
         self.define_min_max()
 
-    def get_y(self, x: float):
-        return self.interesect_G.center[1]
+    def get_pt2(self):
+        return self.interesect_G.center
 
     def define_rect_mouse(self):
         self.origine_rect_mouse = self.points[0]
@@ -115,10 +116,17 @@ class DrawArc(DrawFigure):
         self.width_rect_d = self.width_rect_m * 2
         self.height_rect_d = self.height_rect_m * 2
 
-        if (self.cadre == 0) | (self.cadre == 2):
-            self.origine_rect_draw = self.origine_rect_mouse[0] - self.width_rect_m, self.origine_rect_mouse[1]
-        elif (self.cadre == 1) | (self.cadre == 3):
-            self.origine_rect_draw = self.origine_rect_mouse
+        if not self.reversed:
+            if (self.cadre == 0) | (self.cadre == 2):
+                self.origine_rect_draw = self.origine_rect_mouse[0] - self.width_rect_m, self.origine_rect_mouse[1]
+            elif (self.cadre == 1) | (self.cadre == 3):
+                self.origine_rect_draw = self.origine_rect_mouse
+        else:
+            if (self.cadre == 0) | (self.cadre == 2):
+                self.origine_rect_draw = self.origine_rect_mouse[0], self.origine_rect_mouse[1]-self.height_rect_m
+            elif (self.cadre == 1) | (self.cadre == 3):
+                self.origine_rect_draw = self.origine_rect_mouse[0] - self.width_rect_m, \
+                                         self.origine_rect_mouse[1] - self.height_rect_m
 
         self.rect_draw = Rect(self.origine_rect_draw[0], self.origine_rect_draw[1],
                               self.width_rect_d, self.height_rect_d)
@@ -196,34 +204,11 @@ class DrawArc(DrawFigure):
         self.define_lines()
         self.define_intersect()
 
-        ep = self._ep
-        color = self.color
-        color_pt = self.color
-        r = ep / 2
-        pt = self.points[0]
-        if self.pt_selected > -1:
-            color_pt = self.color_selected
-            r = self._ep_selected
-            pt = self.points[self.pt_selected]
-        elif self.selected:
-            color = self.color_selected
-            ep = self._ep_selected
-        elif self.pt_survol > -1:
-            color_pt = self.color_overed
-            r = self._ep_overed
-            pt = self.points[self.pt_survol]
-        if self.overed & (self.pt_survol == -1) & (not self.selected):
-            ep = self._ep_overed
-            color = self.color_overed
-        if (self.pt_survol > -1) | (self.pt_selected > -1):
-            draw.circle(surface=self.surface, color=color_pt,
-                        center=(pt[0], pt[1]),
-                        radius=r)
+        draw.arc(self.surface, self.color, self.rect_draw, self.angle_start, self.angle_end, self._ep)
 
-        draw.arc(self.surface, color, self.rect_draw, self.angle_start, self.angle_end, ep)
-
-        if self.draw_construction:
+        if self.draw_rect_create:
             self.draw_rect()
+        if self.draw_construction:
             self.draw_circles()
             self.draw_lines()
             self.draw_point()
@@ -233,6 +218,13 @@ class DrawArc(DrawFigure):
         self.max_x = self.rect_mouse.left + self.rect_mouse.width
         self.min_y = self.rect_mouse.top
         self.max_y = self.rect_mouse.top + self.rect_mouse.height
+
+    def reverse_curve(self):
+        if self.reversed:
+            self.reversed = False
+        else:
+            self.reversed = True
+        self.update_formula()
 
 
 def _angle_droite(c, s):

@@ -10,6 +10,8 @@ class Forms:
         self.mouse_pos = None
         self.mouse_bt = None
         self.act_figure = None
+        self.n_act_figure = -1
+        self.n_figures = 0
 
     def add(self, type_forms: str = "line"):
         create = False
@@ -25,11 +27,29 @@ class Forms:
             create = True
 
         if create:
-            self.act_figure = len(self.figures) - 1
+            self.n_figures += 1
+            self.act_figure = self.n_figures - 1
             self.figures[self.act_figure].create()
+
+    def edit(self, type_edit: str = "invert curve"):
+        if type_edit == "invert curve":
+            if isinstance(self.act_figure, DrawArc):
+                self.act_figure.reverse_curve()
+
+    def delete(self):
+        if self.act_figure is not None:
+            self.figures.pop(self.n_act_figure)
+            self.n_act_figure = -1
+            self.act_figure = None
+            self.n_figures -= 1
 
     def update(self, mouse_pos, mouse_bt):
         self.mouse_bt = mouse_bt
         self.mouse_pos = mouse_pos
-        for fig in self.figures:
-            fig.update(mouse_pos, mouse_bt)
+        self.n_act_figure = -1
+        self.act_figure = None
+        for n in range(self.n_figures):
+            self.figures[n].update(mouse_pos, mouse_bt)
+            if self.figures[n].selected:
+                self.act_figure = self.figures[n]
+                self.n_act_figure = n

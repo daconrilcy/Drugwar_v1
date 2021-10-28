@@ -1,4 +1,5 @@
-from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYUP, KEYDOWN, K_l, K_a, K_c, event, mouse, draw
+from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYUP, K_l, K_a, K_c, K_DELETE,mouse
+
 from tools.editor_path.forms import Forms
 
 
@@ -20,15 +21,17 @@ class ActionEdithPath:
         if ev != self.last_ev:
             if ev.type == KEYUP:
                 if ev.key == K_l:
-                    self.create_form("line")
+                    self.forms.add("line")
                 elif ev.key == K_a:
-                    self.create_form("arc")
+                    self.forms.add("arc")
+                elif ev.key == K_c:
+                    self.forms.edit("invert curve")
+                elif ev.key == K_DELETE:
+                    self.forms.delete()
+
             elif (ev.type == MOUSEBUTTONUP) | (ev.type == MOUSEBUTTONDOWN):
                 self.mouse_bt = ev.type
 
             self.last_ev = ev
 
         self.forms.update(mouse_pos=self.mouse_pos, mouse_bt=self.mouse_bt)
-
-    def create_form(self, type_ev: str = "line"):
-        self.forms.add(type_ev)

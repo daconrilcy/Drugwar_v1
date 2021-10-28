@@ -1,13 +1,13 @@
 import math
 
-import pygame.draw
+from pygame import draw
 from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 
 class DrawFigure:
     def __init__(self, surface: Surface, x: float, y: float,
-                 color_base: tuple = (180, 180, 180), color_overed: tuple = (200, 200, 200), color_selected=(255, 0, 0),
-                 ep_base: int = 4, ep_survol: int = 6, ep_selected: int = 6,
+                 color_base: tuple = (150, 150, 150), color_overed: tuple = (50, 255, 50), color_selected=(255, 0, 0),
+                 ep_base: int = 2, ep_survol: int = 4, ep_selected: int = 4,
                  marge: int = 10, rayon_pts: int = 2):
 
         self.surface = surface
@@ -59,13 +59,13 @@ class DrawFigure:
         if (self.prev_clic == MOUSEBUTTONDOWN) & (self.mouse_statut == MOUSEBUTTONUP):
             self.clicked = True
 
-    def create(self, *args):
+    def create(self):
         self.under_creation = True
         if self.clicked:
             self.n_clic += 1
 
         if self.n_clic == 0:
-            pygame.draw.circle(self.surface, color=self.color_ini, center=self.mouse_pos, radius=5)
+            draw.circle(self.surface, color=self.color_ini, center=self.mouse_pos, radius=5)
             self.modif_point_to(0, self.mouse_pos)
             self.modif_point_to(1, self.mouse_pos)
         elif self.n_clic == 1:
@@ -79,9 +79,10 @@ class DrawFigure:
 
         self.pt_selected = -1
         self.pt_survol = -1
+        self.selected = True
 
-    def get_y(self, x: float):
-        pass
+    def get_pt2(self):
+        return 0, 0
 
     def modif(self, pt: tuple):
         pass
@@ -97,6 +98,8 @@ class DrawFigure:
         self.mouse_pos = mouse_pos
         self.mouse_statut = mouse_statut
         self.test_clic()
+        if not self.under_creation:
+            self.overhead_selected_behaviour()
 
         if self.under_creation:
             self.create()
@@ -119,8 +122,7 @@ class DrawFigure:
     def is_overed(self):
         self.overed = False
         if self.is_mouse_in_zone():
-            y2 = self.get_y(self.mouse_pos[0])
-            pt2 = self.mouse_pos[0], y2
+            pt2 = self.get_pt2()
             if math.dist(self.mouse_pos, pt2) <= self.marge:
                 self.overed = True
 
@@ -135,11 +137,10 @@ class DrawFigure:
     def is_selected(self):
         if self.pt_selected == -1 & self.pt_move == -1:
             if self.mouse_statut == MOUSEBUTTONDOWN:
-                if not self.selected:
-                    if self.overed:
-                        self.selected = True
-                    else:
-                        self.selected = False
+                if self.overed:
+                    self.selected = True
+                else:
+                    self.selected = False
             elif self.clicked:
                 self.selected = False
                 if self.overed:
@@ -192,10 +193,7 @@ class DrawFigure:
     def is_mouse_in_zone(self):
         if (self.mouse_pos[0] <= self.max_x) & (self.mouse_pos[0] >= self.min_x):
             if (self.mouse_pos[1] <= self.max_y) & (self.mouse_pos[1] >= self.min_y):
-                print("In Zone")
                 return True
-
-        print("Hors Zone")
         return False
 
     def define_min_max(self):
@@ -212,3 +210,28 @@ class DrawFigure:
                 self.max_y = point[1]
             if point[1] < self.min_y:
                 self.min_y = point[1]
+
+    def overhead_selected_behaviour(self):
+        self._ep = self._ep_ini
+        self.color = self.color_ini
+        color_pt = self.color_ini
+        r = self._ep / 2
+        pt = self.points[0]
+        if self.pt_selected > -1:
+            color_pt = self.color_selected
+            r = self._ep_selected
+            pt = self.points[self.pt_selected]
+        elif self.selected:
+            self.color = self.color_selected
+            self._ep = self._ep_selected
+        elif self.pt_survol > -1:
+            color_pt = self.color_overed
+            r = self._ep_overed
+            pt = self.points[self.pt_survol]
+        if self.overed & (self.pt_survol == -1) & (not self.selected):
+            self._ep = self._ep_overed
+            self.color = self.color_overed
+        if (self.pt_survol > -1) | (self.pt_selected > -1):
+            draw.circle(surface=self.surface, color=color_pt,
+                        center=(pt[0], pt[1]),
+                        radius=r)
