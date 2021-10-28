@@ -12,17 +12,18 @@ class Forms:
         self.act_figure = None
         self.n_act_figure = -1
         self.n_figures = 0
+        self.grided = False
 
-    def add(self, type_forms: str = "line"):
+    def add(self, type_forms: str = "line", pas: int = 32):
         create = False
         if type_forms == "line":
             self.figures.append(
-                DrawLine(self.surface, self.mouse_pos[0], self.mouse_pos[1])
+                DrawLine(surface=self.surface, x=self.mouse_pos[0], y=self.mouse_pos[1], pas=pas)
             )
             create = True
         elif type_forms == "arc":
             self.figures.append(
-                DrawArc(self.surface, self.mouse_pos[0], self.mouse_pos[1])
+                DrawArc(self.surface, self.mouse_pos[0], self.mouse_pos[1], pas=pas)
             )
             create = True
 
@@ -50,6 +51,7 @@ class Forms:
         self.act_figure = None
         for n in range(self.n_figures):
             self.figures[n].update(mouse_pos, mouse_bt)
+            self.figures[n].grided = self.grided
             if self.figures[n].selected:
                 self.act_figure = self.figures[n]
                 self.n_act_figure = n

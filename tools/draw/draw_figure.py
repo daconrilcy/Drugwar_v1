@@ -6,9 +6,9 @@ from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 class DrawFigure:
     def __init__(self, surface: Surface, x: float, y: float,
-                 color_base: tuple = (150, 150, 150), color_overed: tuple = (50, 255, 50), color_selected=(255, 0, 0),
+                 color_base: tuple = (255, 100, 100), color_overed: tuple = (50, 255, 50), color_selected=(255, 0, 0),
                  ep_base: int = 2, ep_survol: int = 4, ep_selected: int = 4,
-                 marge: int = 10, rayon_pts: int = 2):
+                 marge: int = 10, rayon_pts: int = 2, pas: int = 32):
 
         self.surface = surface
 
@@ -51,6 +51,9 @@ class DrawFigure:
 
         self.active = False
 
+        self.pas = pas
+        self.grided = False
+
         self.prev_clic = None
         self.clicked = False
 
@@ -88,7 +91,11 @@ class DrawFigure:
         pass
 
     def modif_point_to(self, n_pt: int, pt: tuple):
-        self.points[n_pt] = pt
+        if self.grided:
+            x, y = round(pt[0]/self.pas, 0)*self.pas, round(pt[1]/self.pas, 0)*self.pas
+        else:
+            x, y = pt[0], pt[1]
+        self.points[n_pt] = x, y
         self.update_formula()
 
     def update_formula(self):
@@ -176,6 +183,9 @@ class DrawFigure:
                 for n in range(self.n_points):
                     a = self.points[n][0] + vec[0]
                     b = self.points[n][1] + vec[1]
+                    if self.grided:
+                        a = round(a/self.pas, 0)*self.pas
+                        b = round(a/self.pas, 0)*self.pas
                     self.points[n] = a, b
                 self.update_formula()
                 self.old_mouse_pos = self.mouse_pos
@@ -187,7 +197,13 @@ class DrawFigure:
 
     def move_point_to(self):
         if self.pt_move > -1:
-            self.points[self.pt_move] = self.mouse_pos
+            if not self.grided:
+                x, y = self.mouse_pos
+            else:
+                x = round(self.mouse_pos[0]/self.pas, 0)*self.pas
+                y = round(self.mouse_pos[1]/self.pas, 0)*self.pas
+
+            self.points[self.pt_move] = x, y
             self.update_formula()
 
     def is_mouse_in_zone(self):

@@ -43,8 +43,8 @@ class _Point:
 
 
 class DrawArc(DrawFigure):
-    def __init__(self, surface: Surface, x: float, y: float, marge: int = 8):
-        super().__init__(surface=surface, x=x, y=y, marge=marge)
+    def __init__(self, surface: Surface, x: float, y: float, marge: int = 8, pas: int = 32):
+        super().__init__(surface=surface, x=x, y=y, marge=marge, pas=pas)
         self.angle_ini = pi / 2
         self.angle = self.angle_ini
         self.angle_start = 0

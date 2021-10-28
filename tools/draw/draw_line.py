@@ -3,8 +3,8 @@ from tools.draw.draw_figure import DrawFigure
 
 
 class DrawLine(DrawFigure):
-    def __init__(self, surface: pygame.Surface, x: float, y: float, marge: int = 8):
-        super().__init__(surface=surface, x=x, y=y, marge=marge)
+    def __init__(self, surface: pygame.Surface, x: float, y: float, marge: int = 8, pas: int = 32):
+        super().__init__(surface=surface, x=x, y=y, marge=marge, pas=pas)
         self.a = 0
         self.b = 0
 
