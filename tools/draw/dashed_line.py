@@ -8,7 +8,7 @@ class DashedLine:
     # https://codereview.stackexchange.com/questions/70143/drawing-a-dashed-line-with-pygame
     def __init__(self, surface: pygame.Surface, color=(255, 255, 255),
                  start_pos: tuple = (0, 0), end_pos: tuple = (0, 0),
-                 width=1, dash_length=4, exclude_corners=True):
+                 width=2, dash_length=4, exclude_corners=True):
         self.surface = surface
         self.color = color
 
@@ -33,9 +33,16 @@ class DashedLine:
 
     def change_start_pos(self, x: (float, tuple), y: float = None):
         self.start_pos = self._change_pos(x, y)
+        self.update_calc()
 
     def change_end_pos(self, x: (float, tuple), y: float = None):
         self.end_pos = self._change_pos(x, y)
+        self.update_calc()
+
+    def change_points(self, start_pos: tuple, end_pos: tuple):
+        self.change_start_pos(start_pos)
+        self.change_end_pos(end_pos)
+        self.update_calc()
 
     def _calc_length(self):
         # get euclidian distance between start_pos and end_pos
@@ -54,7 +61,6 @@ class DashedLine:
                           self.width)
          for n in range(int(self.exclude_corners), self.dash_amount - int(self.exclude_corners), 2)]
 
-    def update(self):
+    def update_calc(self):
         self._calc_length()
         self._calc_dash()
-        self.draw()

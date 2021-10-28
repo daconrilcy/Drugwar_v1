@@ -1,6 +1,6 @@
 import math
 
-from pygame import draw
+from pygame import draw, Color
 from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 
@@ -12,10 +12,10 @@ class DrawFigure:
 
         self.surface = surface
 
-        self.color_ini = color_base
-        self.color = color_base
-        self.color_overed = color_overed
-        self.color_selected = color_selected
+        self.color_ini = Color(color_base[0], color_base[1], color_base[2])
+        self.color = self.color_ini
+        self.color_overed = Color(color_overed[0], color_overed[1], color_overed[2])
+        self.color_selected = Color(color_selected[0], color_selected[1], color_selected[2])
 
         self._ep_ini = ep_base
         self._ep = ep_base
@@ -99,7 +99,7 @@ class DrawFigure:
         self.update_formula()
 
     def update_formula(self):
-        pass
+        self.define_min_max()
 
     def update(self, mouse_pos: tuple, mouse_statut):
         self.mouse_pos = mouse_pos
@@ -207,16 +207,19 @@ class DrawFigure:
             self.update_formula()
 
     def is_mouse_in_zone(self):
-        if (self.mouse_pos[0] <= self.max_x) & (self.mouse_pos[0] >= self.min_x):
-            if (self.mouse_pos[1] <= self.max_y) & (self.mouse_pos[1] >= self.min_y):
+        return self.pt_is_in_zone(self.mouse_pos)
+    
+    def pt_is_in_zone(self, pt):
+        if (pt[0] <= self.max_x) & (pt[0] >= self.min_x):
+            if (pt[1] <= self.max_y) & (pt[1] >= self.min_y):
                 return True
         return False
 
     def define_min_max(self):
         self.min_x = self.points[0][0]
-        self.max_x = self.points[0][0]
+        self.max_x = self.points[1][0]
         self.min_y = self.points[0][1]
-        self.max_y = self.points[0][1]
+        self.max_y = self.points[1][1]
         for point in self.points:
             if point[0] > self.max_x:
                 self.max_x = point[0]

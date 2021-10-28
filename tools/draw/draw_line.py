@@ -44,5 +44,5 @@ class DrawLine(DrawFigure):
         self.b = self.points[0][1] - self.a * self.points[0][0]
         self.define_min_max()
 
-    def get_y(self, x: float):
-        return self.a * x + self.b
+    def get_pt2(self):
+        return self.mouse_pos[0], self.a * self.mouse_pos[0] + self.b

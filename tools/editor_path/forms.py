@@ -13,6 +13,7 @@ class Forms:
         self.n_act_figure = -1
         self.n_figures = 0
         self.grided = False
+        self.linked_points = []
 
     def add(self, type_forms: str = "line", pas: int = 32):
         create = False
@@ -23,7 +24,7 @@ class Forms:
             create = True
         elif type_forms == "arc":
             self.figures.append(
-                DrawArc(self.surface, self.mouse_pos[0], self.mouse_pos[1], pas=pas)
+                DrawArc(surface=self.surface, x=self.mouse_pos[0], y=self.mouse_pos[1], pas=pas)
             )
             create = True
 
