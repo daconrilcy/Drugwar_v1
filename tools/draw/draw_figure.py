@@ -29,6 +29,7 @@ class DrawFigure:
 
         self.overed = False
         self.selected = False
+        self.fm_selected_clicked = False
 
         self.pt_survol: int = -1
         self.pt_selected: int = -1
@@ -147,19 +148,26 @@ class DrawFigure:
                 if self.overed:
                     self.selected = True
                 else:
-                    self.selected = False
+                    if self.fm_selected_clicked:
+                        self.selected = False
             elif self.clicked:
                 self.selected = False
                 if self.overed:
                     self.selected = True
+                    self.fm_selected_clicked = True
                     self.old_mouse_pos = self.mouse_pos
+                else:
+                    self.fm_selected_clicked = False
             else:
                 self.old_mouse_pos = None
+        if self.selected:
+            self.update_formula()
 
     def is_point_selected(self):
         if self.clicked:
             if self.pt_survol > -1:
                 self.selected = False
+                self.fm_selected_clicked = False
                 self.pt_selected = self.pt_survol
                 self.pt_move = -1
                 self.old_mouse_pos = None
@@ -178,17 +186,12 @@ class DrawFigure:
         if self.selected & (self.mouse_statut == MOUSEBUTTONDOWN):
             if self.old_mouse_pos is None:
                 self.old_mouse_pos = self.mouse_pos
-            else:
-                vec = self.mouse_pos[0] - self.old_mouse_pos[0], self.mouse_pos[1] - self.old_mouse_pos[1]
-                for n in range(self.n_points):
-                    a = self.points[n][0] + vec[0]
-                    b = self.points[n][1] + vec[1]
-                    if self.grided:
-                        a = round(a/self.pas, 0)*self.pas
-                        b = round(a/self.pas, 0)*self.pas
-                    self.points[n] = a, b
-                self.update_formula()
-                self.old_mouse_pos = self.mouse_pos
+            vec = self.mouse_pos[0] - self.old_mouse_pos[0], self.mouse_pos[1] - self.old_mouse_pos[1]
+            for n in range(self.n_points):
+                new_point = self.points[n][0] + vec[0], self.points[n][1] + vec[1]
+                self.modif_point_to(n, new_point)
+            self.update_formula()
+            self.old_mouse_pos = self.mouse_pos
 
     def button_up(self):
         if self.mouse_statut == MOUSEBUTTONUP:
@@ -254,3 +257,6 @@ class DrawFigure:
             draw.circle(surface=self.surface, color=color_pt,
                         center=(pt[0], pt[1]),
                         radius=r)
+
+    def reverse_curve(self):
+        pass

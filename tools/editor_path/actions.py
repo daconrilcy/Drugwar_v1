@@ -1,4 +1,4 @@
-from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYUP, K_l, K_a, K_c, K_DELETE, K_g, K_s, mouse
+from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYUP, K_l, K_a, K_c, K_DELETE, K_g, K_s, K_j, mouse
 from tools.editor_path.grid import GridPlot
 from tools.editor_path.selector import Selector
 
@@ -37,6 +37,8 @@ class ActionEdithPath:
                     self.grid.active_desactive()
                 elif ev.key == K_s:
                     self.selector.select(self.forms)
+                elif ev.key == K_j:
+                    self.forms.join_points()
 
             elif (ev.type == MOUSEBUTTONUP) | (ev.type == MOUSEBUTTONDOWN):
                 self.mouse_bt = ev.type
@@ -47,4 +49,4 @@ class ActionEdithPath:
         self.forms.grided = self.grid.active
         self.selector.update(self.mouse_pos, self.mouse_bt)
         if self.selector.selection_to_get:
-            print(self.selector.get_selected())
+            self.forms.get_selected_points(self.selector.get_selected())

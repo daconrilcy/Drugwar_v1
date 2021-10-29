@@ -1,4 +1,4 @@
-from pygame import Surface, draw, Color
+from pygame import Surface, draw
 from tools.draw.dashed_line import DashedLine
 from tools.draw.draw_figure import DrawFigure
 
@@ -16,7 +16,6 @@ class DrawBox(DrawFigure):
         self.pt_2 = self.origine
         self.pt_3 = self.end
         self.lines = []
-        print(color_base)
         for n in range(4):
             self.lines.append(DashedLine(surface=surface, color=self.color_ini,
                                          start_pos=self.mouse_pos, end_pos=self.mouse_pos))
@@ -82,4 +81,3 @@ class DrawBox(DrawFigure):
 
     def get_pt2(self):
         return self.mouse_pos
-

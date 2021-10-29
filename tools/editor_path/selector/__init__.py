@@ -28,7 +28,6 @@ class Selector:
         if self.drawingBox is not None:
             self.drawingBox.update(mouse_pos, mouse_bt)
         if self.is_drawb_created():
-            print("done")
             self.plots_selected()
             self.drawingBox = None
 
